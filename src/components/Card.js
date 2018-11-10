@@ -2,10 +2,11 @@ import React from 'react';
 import { getImageUrl } from '../../config';
 
 class Card extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
+      liked: props.wasLiked,
       summaryShowing: false,
     };
   }
@@ -22,6 +23,7 @@ class Card extends React.Component {
     const { summaryShowing } = this.state;
     const {
       data: {
+        id,
         poster_path,
         original_title,
         overview,
@@ -40,7 +42,7 @@ class Card extends React.Component {
         </div>
 
         <div className="card__like">
-          <i className="fa fa-heart-o" />
+          <i className={this.state.liked ? "fa fa-heart" : "fa fa-heart-o"} onClick={() => { this.handleLikeClick(id)}}/>
         </div>
 
         <div className="card__subtitle">
@@ -65,6 +67,14 @@ class Card extends React.Component {
 
     );
   }
+
+    handleLikeClick(id) {
+        const newLikedValue = !this.state.liked;
+        this.props.onMovieLikedStateChange(id, newLikedValue);
+        this.setState({
+            liked: newLikedValue
+        })
+    }
 }
 
 export default Card;
