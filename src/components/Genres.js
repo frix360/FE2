@@ -1,48 +1,27 @@
 import React from 'react';
-import axios from 'axios';
-import Card from './Card';
-import { endpoints } from '../../config';
+import { getGenres, getGenreMovies } from '../thunks';
+import { setGenres } from '../actions';
+import { connect } from 'react-redux';
 
-export default class Genres extends React.Component {
-  constructor() {
-    super();
 
-    this.state = {
-      genres: [],
-    };
+class Genres extends React.Component {
+  constructor(props) {
+    super(props);
 
-    this.requestGenres();
+
+    this.props.onGetGenres();
   }
 
-  requestGenres = () => {
-    axios
-      .get(endpoints.genres())
-      .then((res) => this.setGenreList(res.data.genres))
-      .catch((error) => console.log(error));
-  };
-
-  requestGenresMovies = (id) => {
-    const { onChangeList } = this.props;
-
-    axios
-      .get(endpoints.genreMovies(id))
-      .then((res) => onChangeList(res.data.results))
-      .catch((error) => console.log(error));
-  };
-
-  setGenreList = (genres) => {
-    this.setState({
-      genres,
-    })
-  };
-
   render() {
-    const { genres } = this.state;
+    const { genresList, addLog } = this.props;
 
     return (
       <div className="genres">
-        {genres.map((genre) => (
-          <div key={genre.id} className="genre" onClick={() => this.requestGenresMovies(genre.id)}>
+        {genresList.map((genre) => (
+          <div key={genre.id} className="genre" onClick={() => {
+              addLog(`Pakeistas zanras i ${genre.name}`);
+              this.props.onGetGenreMovies(genre.id);
+          }}>
             {genre.name}
           </div>
         ))}
@@ -50,3 +29,21 @@ export default class Genres extends React.Component {
     );
   }
 }
+
+export default connect(
+    // function to get data from redux store to this components props
+    (state) => {
+        return {
+          genresList: state.genres.list,
+        };
+    },
+    // function to pass action callers to this components props
+    (dispatch) => {
+        return {
+            onSetGenres: (genres) => dispatch(setGenres(genres)),
+            onGetGenres: () => dispatch(getGenres()),
+            onGetGenreMovies: (id) => dispatch(getGenreMovies(id))
+        };
+    },
+)(Genres);
+
